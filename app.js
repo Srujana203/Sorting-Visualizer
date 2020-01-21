@@ -182,7 +182,7 @@ async function insertionSort(unsortedList) {
   states[0] = 0;
   for (var i = 1; i < len; i++) {
     states[i] = 0;
-    await sleep(50);
+    await sleep(100);
     var tmp = unsortedList[i];
     for (var j = i - 1; j >= 0 && unsortedList[j] > tmp; j--) {
       unsortedList[j + 1] = unsortedList[j];

@@ -38,6 +38,18 @@ function setup() {
   quick_sort.onclick = function() {
     quickSort(values, 0, values.length - 1);
   };
+  let heap_sort = document.getElementById("heap_sort");
+  heap_sort.onclick = function() {
+    // heapSort(values, 0, values.length - 1);
+  };
+  let bubble_sort = document.getElementById("bubble_sort");
+  bubble_sort.onclick = function() {
+    bubbleSort(values);
+  };
+  let merge_sort = document.getElementById("merge_sort");
+  merge_sort.onclick = function() {
+    mergeSort(values);
+  };
 }
 
 async function quickSort(arr, start, end) {
@@ -104,6 +116,73 @@ async function swap(arr, a, b) {
   arr[b] = temp;
 }
 
+async function mergeSort(array) {
+  if (array.length <= 1) return array;
+  const auxiliaryArray = array.slice();
+  await mergeSortHelper(array, 0, array.length - 1, auxiliaryArray);
+}
+
+async function mergeSortHelper(mainArray, startIdx, endIdx, auxiliaryArray) {
+  if (startIdx === endIdx) return;
+  const middleIdx = Math.floor((startIdx + endIdx) / 2);
+  await sleep((endIdx - startIdx) * 4);
+  await mergeSortHelper(auxiliaryArray, startIdx, middleIdx, mainArray);
+  await mergeSortHelper(auxiliaryArray, middleIdx + 1, endIdx, mainArray);
+  await doMerge(mainArray, startIdx, middleIdx, endIdx, auxiliaryArray);
+}
+
+async function doMerge(mainArray, startIdx, middleIdx, endIdx, auxiliaryArray) {
+  for (let i = startIdx; i <= endIdx; i++) {
+    states[i] = 1;
+  }
+  let z = startIdx;
+  let k = startIdx;
+  let i = startIdx;
+  let j = middleIdx + 1;
+  while (i <= middleIdx && j <= endIdx) {
+    states[z++] = 0;
+    await sleep(20);
+    if (auxiliaryArray[i] <= auxiliaryArray[j]) {
+      mainArray[k++] = auxiliaryArray[i++];
+    } else {
+      mainArray[k++] = auxiliaryArray[j++];
+    }
+  }
+  while (i <= middleIdx) {
+    states[z++] = 0;
+    await sleep(20);
+    mainArray[k++] = auxiliaryArray[i++];
+  }
+  while (j <= endIdx) {
+    states[z++] = 0;
+    await sleep(20);
+    mainArray[k++] = auxiliaryArray[j++];
+  }
+  for (let i = startIdx; i <= endIdx; i++) {
+    states[i] = -1;
+  }
+}
+
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function bubbleSort(arr) {
+  var len = arr.length;
+
+  for (var i = 0; i < len; i++) {
+    for (var j = 0; j < len - i - 1; j++) {
+      states[j] = 1;
+    }
+    for (var j = 0; j < len - i - 1; j++) {
+      if (arr[j] > arr[j + 1]) {
+        states[j] = 0;
+        await sleep(10);
+        var temp = arr[j];
+        arr[j] = arr[j + 1];
+        arr[j + 1] = temp;
+      }
+      states[j] = -1;
+    }
+  }
 }

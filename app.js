@@ -182,7 +182,7 @@ async function insertionSort(unsortedList) {
   states[0] = 0;
   for (var i = 1; i < len; i++) {
     states[i] = 0;
-    await sleep(100);
+    await sleep(50);
     var tmp = unsortedList[i];
     for (var j = i - 1; j >= 0 && unsortedList[j] > tmp; j--) {
       unsortedList[j + 1] = unsortedList[j];
@@ -212,7 +212,7 @@ async function max_heapify(a, i, length) {
     for (let z = i + 1; z < largest; z++) {
       states[z] = 1;
     }
-    await swap(a, i, largest, 0);
+    await swap(a, i, largest, 10);
     for (let z = i + 1; z < largest; z++) {
       states[z] = -1;
     }

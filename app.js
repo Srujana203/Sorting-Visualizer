@@ -12,7 +12,7 @@ function setup() {
   createCanvas(v * 10, 600);
   values = new Array(Number(v));
   for (let i = 0; i < values.length; i++) {
-    values[i] = random(height);
+    values[i] = Math.floor(random(height));
     states[i] = -1;
   }
   array.onclick = function() {
@@ -20,7 +20,7 @@ function setup() {
 
     values = new Array(Number(v));
     for (let i = 0; i < values.length; i++) {
-      values[i] = random(height);
+      values[i] = Math.floor(random(height));
       states[i] = -1;
     }
   };
@@ -30,7 +30,7 @@ function setup() {
     createCanvas(v * 10, 500);
     values = new Array(Number(v));
     for (let i = 0; i < values.length; i++) {
-      values[i] = random(height);
+      values[i] = Math.floor(random(height));
       states[i] = -1;
     }
   };
@@ -48,7 +48,7 @@ function setup() {
   };
   let merge_sort = document.getElementById("merge_sort");
   merge_sort.onclick = function() {
-    mergeSort(values);
+    mergeSort(values, 0, values.length - 1);
   };
   let selection_sort = document.getElementById("selection_sort");
   selection_sort.onclick = function() {
@@ -116,59 +116,12 @@ function draw() {
   }
 }
 
-async function swap(arr, a, b) {
-  await sleep(50);
+async function swap(arr, a, b, speed = 50) {
+  await sleep(speed);
 
   let temp = arr[a];
   arr[a] = arr[b];
   arr[b] = temp;
-}
-
-async function mergeSort(array) {
-  if (array.length <= 1) return array;
-  const auxiliaryArray = array.slice();
-  await mergeSortHelper(array, 0, array.length - 1, auxiliaryArray);
-}
-
-async function mergeSortHelper(mainArray, startIdx, endIdx, auxiliaryArray) {
-  if (startIdx === endIdx) return;
-  const middleIdx = Math.floor((startIdx + endIdx) / 2);
-  await sleep((endIdx - startIdx) * 4);
-  await mergeSortHelper(auxiliaryArray, startIdx, middleIdx, mainArray);
-  await mergeSortHelper(auxiliaryArray, middleIdx + 1, endIdx, mainArray);
-  await doMerge(mainArray, startIdx, middleIdx, endIdx, auxiliaryArray);
-}
-
-async function doMerge(mainArray, startIdx, middleIdx, endIdx, auxiliaryArray) {
-  for (let i = startIdx; i <= endIdx; i++) {
-    states[i] = 1;
-  }
-  let z = startIdx;
-  let k = startIdx;
-  let i = startIdx;
-  let j = middleIdx + 1;
-  while (i <= middleIdx && j <= endIdx) {
-    states[z++] = 0;
-    await sleep(20);
-    if (auxiliaryArray[i] <= auxiliaryArray[j]) {
-      mainArray[k++] = auxiliaryArray[i++];
-    } else {
-      mainArray[k++] = auxiliaryArray[j++];
-    }
-  }
-  while (i <= middleIdx) {
-    states[z++] = 0;
-    await sleep(20);
-    mainArray[k++] = auxiliaryArray[i++];
-  }
-  while (j <= endIdx) {
-    states[z++] = 0;
-    await sleep(20);
-    mainArray[k++] = auxiliaryArray[j++];
-  }
-  for (let i = startIdx; i <= endIdx; i++) {
-    states[i] = -1;
-  }
 }
 
 function sleep(ms) {
@@ -185,10 +138,7 @@ async function bubbleSort(arr) {
     for (var j = 0; j < len - i - 1; j++) {
       if (arr[j] > arr[j + 1]) {
         states[j] = 0;
-        await sleep(1);
-        var temp = arr[j];
-        arr[j] = arr[j + 1];
-        arr[j + 1] = temp;
+        await swap(arr, j, j + 1, 0);
       }
       states[j] = -1;
     }
@@ -211,10 +161,7 @@ async function selectionSort(items) {
       }
       states[i] = 0;
       states[min] = 0;
-      await sleep(100);
-      let tmp = items[i];
-      items[i] = items[min];
-      items[min] = tmp;
+      await swap(items, i, min, 100);
       states[min] = -1;
       states[i] = -1;
       for (let x = start; x < end; x++) {
@@ -265,8 +212,7 @@ async function max_heapify(a, i, length) {
     for (let z = i + 1; z < largest; z++) {
       states[z] = 1;
     }
-    await sleep(10);
-    await swap(a, i, largest);
+    await swap(a, i, largest, 0);
     for (let z = i + 1; z < largest; z++) {
       states[z] = -1;
     }
@@ -289,5 +235,59 @@ async function heapSort(a) {
     await swap(a, 0, i);
 
     await max_heapify(a, 0, i);
+  }
+}
+async function mergeSort(array, start, end) {
+  if (start < end) {
+    let middle = Math.floor((start + end) / 2);
+    await mergeSort(array, start, middle);
+    await mergeSort(array, middle + 1, end);
+    await merge(array, start, middle, end);
+  }
+}
+
+async function merge(array, start, middle, end) {
+  let leftArrayLength = middle - start + 1;
+  let rightArrayLength = end - middle;
+
+  let leftArray = [];
+  let rightArray = [];
+
+  for (let i = start; i <= end; i++) {
+    states[i] = 1;
+  }
+  for (let i = 0; i < leftArrayLength; ++i) {
+    leftArray[i] = array[start + i];
+  }
+
+  for (let i = 0; i < rightArrayLength; ++i) {
+    rightArray[i] = array[middle + 1 + i];
+  }
+
+  let leftIndex = 0,
+    rightIndex = 0;
+
+  let currentIndex = start;
+
+  while (leftIndex < leftArrayLength && rightIndex < rightArrayLength) {
+    states[currentIndex] = 0;
+    await sleep(50);
+    if (leftArray[leftIndex] <= rightArray[rightIndex])
+      array[currentIndex] = leftArray[leftIndex++];
+    else array[currentIndex] = rightArray[rightIndex++];
+    currentIndex++;
+  }
+  while (leftIndex < leftArrayLength) {
+    states[currentIndex] = 0;
+    array[currentIndex++] = leftArray[leftIndex++];
+  }
+  while (rightIndex < rightArrayLength) {
+    states[currentIndex] = 0;
+    array[currentIndex++] = rightArray[rightIndex++];
+  }
+  states[currentIndex] = 0;
+  await sleep(5);
+  for (let i = start; i <= end + 1; i++) {
+    states[i] = -1;
   }
 }

@@ -40,7 +40,7 @@ function setup() {
   };
   let heap_sort = document.getElementById("heap_sort");
   heap_sort.onclick = function() {
-    // heapSort(values, 0, values.length - 1);
+    heapSort(values);
   };
   let bubble_sort = document.getElementById("bubble_sort");
   bubble_sort.onclick = function() {
@@ -49,6 +49,14 @@ function setup() {
   let merge_sort = document.getElementById("merge_sort");
   merge_sort.onclick = function() {
     mergeSort(values);
+  };
+  let selection_sort = document.getElementById("selection_sort");
+  selection_sort.onclick = function() {
+    selectionSort(values);
+  };
+  let insertion_sort = document.getElementById("insertion_sort");
+  insertion_sort.onclick = function() {
+    insertionSort(values);
   };
 }
 
@@ -177,12 +185,109 @@ async function bubbleSort(arr) {
     for (var j = 0; j < len - i - 1; j++) {
       if (arr[j] > arr[j + 1]) {
         states[j] = 0;
-        await sleep(10);
+        await sleep(1);
         var temp = arr[j];
         arr[j] = arr[j + 1];
         arr[j + 1] = temp;
       }
       states[j] = -1;
     }
+  }
+}
+async function selectionSort(items) {
+  var length = items.length;
+  for (var i = 0; i < length - 1; i++) {
+    var min = i;
+    for (var j = i + 1; j < length; j++) {
+      if (items[j] < items[min]) {
+        min = j;
+      }
+    }
+    if (min != i) {
+      let start = i;
+      let end = min;
+      for (let x = start; x < end; x++) {
+        states[x] = 1;
+      }
+      states[i] = 0;
+      states[min] = 0;
+      await sleep(100);
+      let tmp = items[i];
+      items[i] = items[min];
+      items[min] = tmp;
+      states[min] = -1;
+      states[i] = -1;
+      for (let x = start; x < end; x++) {
+        states[x] = -1;
+      }
+    }
+  }
+  for (var i = 0; i <= length - 1; i++) {
+    states[i] = -1;
+  }
+}
+
+async function insertionSort(unsortedList) {
+  var len = unsortedList.length;
+  for (var i = 1; i < len; i++) {
+    states[i] = 1;
+  }
+  states[0] = 0;
+  for (var i = 1; i < len; i++) {
+    states[i] = 0;
+    await sleep(50);
+    var tmp = unsortedList[i];
+    for (var j = i - 1; j >= 0 && unsortedList[j] > tmp; j--) {
+      unsortedList[j + 1] = unsortedList[j];
+    }
+    unsortedList[j + 1] = tmp;
+  }
+  for (var i = 0; i < len; i++) {
+    states[i] = -1;
+  }
+}
+async function max_heapify(a, i, length) {
+  while (true) {
+    var left = i * 2 + 1;
+    var right = i * 2 + 2;
+    var largest = i;
+    if (left < length && a[left] > a[largest]) {
+      largest = left;
+    }
+    if (right < length && a[right] > a[largest]) {
+      largest = right;
+    }
+    if (i == largest) {
+      break;
+    }
+    states[i] = 0;
+    states[largest] = 0;
+    for (let z = i + 1; z < largest; z++) {
+      states[z] = 1;
+    }
+    await sleep(10);
+    await swap(a, i, largest);
+    for (let z = i + 1; z < largest; z++) {
+      states[z] = -1;
+    }
+    states[i] = -1;
+    states[largest] = -1;
+    i = largest;
+  }
+}
+
+async function heapify(a, length) {
+  for (var i = Math.floor(length / 2); i >= 0; i--) {
+    await max_heapify(a, i, length);
+  }
+}
+
+async function heapSort(a) {
+  await heapify(a, a.length);
+
+  for (var i = a.length - 1; i > 0; i--) {
+    await swap(a, 0, i);
+
+    await max_heapify(a, 0, i);
   }
 }

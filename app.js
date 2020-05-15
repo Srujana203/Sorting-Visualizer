@@ -7,6 +7,7 @@ var v = rangeslider.value;
 let values = [];
 let w = 10;
 let states = [];
+let flag = False;
 
 function setup() {
   createCanvas(v * 10, 600);
@@ -15,7 +16,7 @@ function setup() {
     values[i] = Math.floor(random(height));
     states[i] = -1;
   }
-  array.onclick = function() {
+  array.onclick = function () {
     createCanvas(v * 10, 600);
 
     values = new Array(Number(v));
@@ -24,7 +25,7 @@ function setup() {
       states[i] = -1;
     }
   };
-  rangeslider.oninput = function() {
+  rangeslider.oninput = function () {
     output.innerHTML = this.value;
     v = this.value;
     createCanvas(v * 10, 500);
@@ -35,27 +36,27 @@ function setup() {
     }
   };
   let quick_sort = document.getElementById("quick_sort");
-  quick_sort.onclick = function() {
+  quick_sort.onclick = function () {
     quickSort(values, 0, values.length - 1);
   };
   let heap_sort = document.getElementById("heap_sort");
-  heap_sort.onclick = function() {
+  heap_sort.onclick = function () {
     heapSort(values);
   };
   let bubble_sort = document.getElementById("bubble_sort");
-  bubble_sort.onclick = function() {
+  bubble_sort.onclick = function () {
     bubbleSort(values);
   };
   let merge_sort = document.getElementById("merge_sort");
-  merge_sort.onclick = function() {
+  merge_sort.onclick = function () {
     mergeSort(values, 0, values.length - 1);
   };
   let selection_sort = document.getElementById("selection_sort");
-  selection_sort.onclick = function() {
+  selection_sort.onclick = function () {
     selectionSort(values);
   };
   let insertion_sort = document.getElementById("insertion_sort");
-  insertion_sort.onclick = function() {
+  insertion_sort.onclick = function () {
     insertionSort(values);
   };
 }
@@ -69,7 +70,7 @@ async function quickSort(arr, start, end) {
 
   await Promise.all([
     quickSort(arr, start, index - 1),
-    quickSort(arr, index + 1, end)
+    quickSort(arr, index + 1, end),
   ]);
 }
 
@@ -125,13 +126,15 @@ async function swap(arr, a, b, speed = 50) {
 }
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function bubbleSort(arr) {
   var len = arr.length;
-
-  for (var i = 0; i < len; i++) {
+  isSorted = false;
+  var i = 0;
+  while (isSorted == false) {
+    isSorted = true;
     for (var j = 0; j < len - i - 1; j++) {
       states[j] = 1;
     }
@@ -139,9 +142,11 @@ async function bubbleSort(arr) {
       if (arr[j] > arr[j + 1]) {
         states[j] = 0;
         await swap(arr, j, j + 1, 0);
+        isSorted = false;
       }
       states[j] = -1;
     }
+    i += 1;
   }
 }
 async function selectionSort(items) {
@@ -177,17 +182,20 @@ async function selectionSort(items) {
 async function insertionSort(unsortedList) {
   var len = unsortedList.length;
   for (var i = 1; i < len; i++) {
-    states[i] = 1;
-  }
-  states[0] = 0;
-  for (var i = 1; i < len; i++) {
-    states[i] = 0;
-    await sleep(50);
     var tmp = unsortedList[i];
     for (var j = i - 1; j >= 0 && unsortedList[j] > tmp; j--) {
+      states[j] = 1;
+    }
+    for (var j = i - 1; j >= 0 && unsortedList[j] > tmp; j--) {
+      states[j] = 0;
+      await sleep(20);
       unsortedList[j + 1] = unsortedList[j];
+      states[j] = -1;
     }
     unsortedList[j + 1] = tmp;
+    for (var j = i - 1; j >= 0; j--) {
+      states[j] = -1;
+    }
   }
   for (var i = 0; i < len; i++) {
     states[i] = -1;
@@ -212,7 +220,7 @@ async function max_heapify(a, i, length) {
     for (let z = i + 1; z < largest; z++) {
       states[z] = 1;
     }
-    await swap(a, i, largest, 10);
+    await swap(a, i, largest, 0);
     for (let z = i + 1; z < largest; z++) {
       states[z] = -1;
     }
@@ -256,6 +264,7 @@ async function merge(array, start, middle, end) {
   for (let i = start; i <= end; i++) {
     states[i] = 1;
   }
+
   for (let i = 0; i < leftArrayLength; ++i) {
     leftArray[i] = array[start + i];
   }
@@ -270,11 +279,11 @@ async function merge(array, start, middle, end) {
   let currentIndex = start;
 
   while (leftIndex < leftArrayLength && rightIndex < rightArrayLength) {
-    states[currentIndex] = 0;
-    await sleep(50);
     if (leftArray[leftIndex] <= rightArray[rightIndex])
       array[currentIndex] = leftArray[leftIndex++];
     else array[currentIndex] = rightArray[rightIndex++];
+    states[currentIndex] = 0;
+    await sleep(50);
     currentIndex++;
   }
   while (leftIndex < leftArrayLength) {
@@ -285,9 +294,8 @@ async function merge(array, start, middle, end) {
     states[currentIndex] = 0;
     array[currentIndex++] = rightArray[rightIndex++];
   }
-  states[currentIndex] = 0;
   await sleep(5);
-  for (let i = start; i <= end + 1; i++) {
+  for (let i = start; i <= end; i++) {
     states[i] = -1;
   }
 }
